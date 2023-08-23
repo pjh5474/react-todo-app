@@ -1,37 +1,4 @@
-import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-
-// function ToDoList() {
-// 	const [toDo, setToDo] = useState("");
-// 	const [toDoError, setToDoError] = useState("");
-// 	const onChange = (event: React.FormEvent<HTMLInputElement>) => {
-// 		const {
-// 			currentTarget: { value },
-// 		} = event;
-// 		setToDoError("");
-// 		setToDo(value);
-// 	};
-// 	const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-// 		event.preventDefault();
-// 		if (toDo.length < 10) {
-// 			return setToDoError("Too short");
-// 		}
-// 		console.log(toDo);
-// 	};
-// 	return (
-// 		<div>
-// 			<form onSubmit={onSubmit}>
-// 				<input
-// 					onChange={onChange}
-// 					value={toDo}
-// 					placeholder="Write a to do"
-// 				/>
-// 				<button>Add</button>
-// 				{toDoError !== "" ? toDoError : null}
-// 			</form>
-// 		</div>
-// 	);
-// }
 
 interface IForm {
 	email: string;
@@ -40,6 +7,7 @@ interface IForm {
 	username: string;
 	password: string;
 	password1: string;
+	extraError?: string;
 }
 
 function ToDoList() {
@@ -48,14 +16,29 @@ function ToDoList() {
 		watch,
 		handleSubmit,
 		formState: { errors },
+		setError,
 	} = useForm<IForm>({
 		defaultValues: {
 			email: "@naver.com",
 		},
 	});
-	const onValid = (data: any) => {
-		console.log(data);
+	const onValid = (data: IForm) => {
+		if (data.password !== data.password1) {
+			setError(
+				"password1",
+				{
+					message: "Password not matched",
+				},
+				{ shouldFocus: true }
+			);
+		}
+
+		// setError("extraError", {
+		// 	message: "Server Offline",
+		// });
 	};
+
+	const invalidStrings = ["nico", "las"];
 
 	return (
 		<div>
@@ -68,14 +51,22 @@ function ToDoList() {
 						required: "Email is required",
 						pattern: {
 							value: /^[A-Za-z0-9._%+-]+@naver.com$/,
-							message: "Only naver email is allowed",
+							message: "Only naver emails allowed",
 						},
 					})}
 					placeholder="Email"
 				/>
 				<span>{errors?.email?.message as string}</span>
 				<input
-					{...register("firstname", { required: "First Name is required" })}
+					{...register("firstname", {
+						required: "First Name is required",
+						validate: {
+							noNico: (value) =>
+								value.includes("nico") ? "Dont use 'nico'" : true,
+							noLas: (value) =>
+								value.includes("las") ? "Dont use 'las'" : true,
+						},
+					})}
 					placeholder="First Name"
 				/>
 				<span>{errors?.firstname?.message as string}</span>
@@ -90,6 +81,19 @@ function ToDoList() {
 						minLength: {
 							value: 5,
 							message: "Your username is too short",
+						},
+						validate: {
+							noInvalidStrings: (value) => {
+								let isValid = true;
+								let wrongstring = "";
+								invalidStrings.forEach((invalidString) => {
+									if (value.includes(invalidString)) {
+										wrongstring = invalidString;
+										isValid = false;
+									}
+								});
+								return isValid || `${wrongstring} is not allowed`;
+							},
 						},
 					})}
 					placeholder="Username"
@@ -118,6 +122,7 @@ function ToDoList() {
 				/>
 				<span>{errors?.password1?.message as string}</span>
 				<button>Add</button>
+				<span>{errors?.extraError?.message as string}</span>
 			</form>
 		</div>
 	);
