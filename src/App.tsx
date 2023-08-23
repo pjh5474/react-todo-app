@@ -1,5 +1,5 @@
 import { createGlobalStyle } from "styled-components";
-import { Helmet } from "react-helmet";
+import { Helmet, HelmetProvider } from "react-helmet-async";
 import ToDoList from "./ToDoList";
 
 const GlobalStyle = createGlobalStyle`
@@ -69,12 +69,14 @@ a {
 function App() {
 	return (
 		<>
-			<Helmet>
-				<link
-					href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400&display=swap"
-					rel="stylesheet"
-				/>
-			</Helmet>
+			<HelmetProvider>
+				<Helmet>
+					<link
+						href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400&display=swap"
+						rel="stylesheet"
+					/>
+				</Helmet>
+			</HelmetProvider>
 			<GlobalStyle />
 			<ToDoList />
 		</>
